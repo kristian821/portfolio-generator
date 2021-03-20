@@ -31,7 +31,7 @@ const promptUser = () => {
 };
 
 const promptProject = portfolioData => {
-    if (!portfolioData.projectAnswers) {
+    if (!portfolioData.projects) {
         portfolioData.projects = [];
     }
 
