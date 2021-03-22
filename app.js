@@ -1,14 +1,7 @@
 const inquirer = require('inquirer');
-// const fs = require('fs');
-// const generatePage = require('./src/page-template');
+const fs = require('fs');
+const generatePage = require('./src/page-template');
 
-// const pageHTML = generatePage(name, github);
-
-// fs.writeFile('index.html', pageHTML, err => {
-//     if (err) throw err;
-    
-//     console.log('Portfolio complete! Check out index.html to see the output!');
-// });
 const promptUser = () => {
    return  inquirer
         .prompt([
@@ -60,15 +53,15 @@ const promptUser = () => {
 };
 
 const promptProject = portfolioData => {
-    if (!portfolioData.projects) {
-        portfolioData.projects = [];
-    }
-
     console.log(`
     =================
     Add a New Project
     =================
     `);
+
+    if (!portfolioData.projects) {
+        portfolioData.projects = [];
+    }
     return inquirer.prompt([
         {
             type: 'input',
@@ -99,7 +92,7 @@ const promptProject = portfolioData => {
         {
             type: 'checkbox',
             name: 'languages',
-            message: 'What did you build this project with? (Check all that apply',
+            message: 'What did you build this project with? (Check all that apply)',
             choices: ['JavaScript', 'HTML', 'CSS', 'ES6', 'jQuery', 'Bootstrap', 'Node.js']
         },
         {
@@ -127,13 +120,25 @@ const promptProject = portfolioData => {
             message: 'Would you like to enter another project?',
             default: false
         }
-    ]);
+    ])
+    .then(projectData => {
+        portfolioData.projects.push(projectData);
+        if (projectData.confirmAddProject) {
+            return promptProject(portfolioData);
+        } else {
+            return portfolioData;
+        }
+    });
 };
 
-promptUser().then(answers => console.log(answers)).then(promptProject).then(projectData => { portfolioData.projects.push(projectData);
-if (projectData.confirmAddProject) {
-    return promptPromptProject(portfolioData);
-} else {
-    return portfolioData;
-}
+promptUser()
+.then(promptProject)
+.then(projectData => { 
+    const pageHTML = generatePage(projectData);    
+
+fs.writeFile('index.html', pageHTML, err => {
+    if (err) throw  new Error(err);
+    
+    console.log('Portfolio complete! Check out index.html to see the output!');
+});
 });
